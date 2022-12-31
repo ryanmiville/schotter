@@ -69,6 +69,9 @@ impl Stone {
         self.y_offset += self.y_velocity;
         self.rotation += self.rot_velocity;
         self.cycles -= 1;
+
+        // self.x_velocity -= 0.01;
+        // self.y_velocity -= 0.01;
     }
 }
 
@@ -84,7 +87,6 @@ struct Model {
     adj: Adjustment,
     gravel: Vec<Stone>,
     main_window: WindowId,
-    motion: f32,
 }
 
 fn model(app: &App) -> Model {
@@ -109,22 +111,18 @@ fn model(app: &App) -> Model {
         }
     }
 
-    let motion = 0.5;
     Model {
         random_seed,
         adj,
         gravel,
         main_window,
-        motion,
     }
 }
 
 fn update(_app: &App, model: &mut Model, _update: Update) {
     for stone in &mut model.gravel {
-        let should_stop = random_f32() > model.motion;
-        match (stone.cycles, should_stop) {
-            (0, true) => stone.stop(),
-            (0, false) => stone.reset(&model.adj),
+        match stone.cycles {
+            0 => stone.stop(),
             _ => stone.update(),
         }
     }
@@ -173,6 +171,7 @@ fn key_pressed(app: &App, model: &mut Model, key: Key) {
                 model.adj.rot -= 0.1;
             }
         }
+        Key::Space => model.gravel.iter_mut().for_each(|s| s.reset(&model.adj)),
         _ => {}
     }
 }
